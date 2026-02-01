@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="wwwroot\Nowy folder1\**" />
+    <Compile Remove="wwwroot\Nowy folder2\**" />
+    <Content Remove="wwwroot\Nowy folder1\**" />
+    <Content Remove="wwwroot\Nowy folder2\**" />
+    <EmbeddedResource Remove="wwwroot\Nowy folder1\**" />
+    <EmbeddedResource Remove="wwwroot\Nowy folder2\**" />
+    <None Remove="wwwroot\Nowy folder1\**" />
+    <None Remove="wwwroot\Nowy folder2\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Protos\tron.proto" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.76.0" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<Protobuf Include="Protos\tron.proto" GrpcServices="Server" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="wwwroot\lib\Nowy folder\" />
+	</ItemGroup>
+
+</Project>

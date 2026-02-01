@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.2.11415.280
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tron.Server", "Tron.Server.csproj", "{8CF965B1-D732-BA2E-73AD-0DDFB3BB21DB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8CF965B1-D732-BA2E-73AD-0DDFB3BB21DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8CF965B1-D732-BA2E-73AD-0DDFB3BB21DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8CF965B1-D732-BA2E-73AD-0DDFB3BB21DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8CF965B1-D732-BA2E-73AD-0DDFB3BB21DB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D22957E2-7A25-4BEC-AC05-60A8AC02A761}
+	EndGlobalSection
+EndGlobal
