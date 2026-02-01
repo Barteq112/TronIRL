@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+option csharp_namespace = "Tron.Protos";
+
+package tron;
+
+service TronGameService {
+  rpc ListGames (Empty) returns (GameListResponse);
+  rpc JoinGame (JoinRequest) returns (JoinResponse);
+  rpc LeaveGame (LeaveRequest) returns (LeaveResponse);
+
+  rpc UpdatePosition (PositionRequest) returns (GameUpdateResponse);
+
+}
+
+message Empty {}
+
+message GameInfo {
+  string id = 1;
+  string name = 2;
+  int32 current_players = 3;
+  int32 max_players = 4;
+  repeated string player_names = 5;
+  
+  // Granice obszaru gry
+  double min_latitude = 6;  
+  double max_latitude = 7;  
+  double min_longitude = 8; 
+  double max_longitude = 9; 
+}
+
+message GameListResponse {
+  repeated GameInfo games = 1;
+}
+
+message JoinRequest {
+  string game_id = 1;
+  string player_name = 2;
+  
+  // Wspó³rzedne gracza
+  double current_latitude = 3;
+  double current_longitude = 4;
+}
+
+message JoinResponse {
+    bool success = 1;
+    string message = 2;
+    string player_id = 3;
+    string player_color = 4;
+    
+    // GRANICE PROSTOK¥TA:
+    double min_latitude = 5;
+    double max_latitude = 6;
+    double min_longitude = 7;
+    double max_longitude = 8;
+}
+
+message LeaveRequest {
+  string game_id = 1;
+  string player_id = 2;   
+  string player_name = 3; 
+}
+
+message LeaveResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message PositionRequest {
+  string GameId = 1;
+  string PlayerName = 2;
+  double Latitude = 3;
+  double Longitude = 4;
+  double Accuracy = 5; 
+  double AccelX = 6;
+  double AccelY = 7;
+  double AccelZ = 8;
+}
+message PlayerState {
+  string Name = 1;
+  double Latitude = 2;
+  double Longitude = 3;
+  string Color = 4;
+}
+
+message GameUpdateResponse {
+  repeated PlayerState Players = 1; 
+  bool IsGameRunning = 2;           
+}

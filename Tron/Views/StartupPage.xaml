@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Tron.ViewModels"
+             x:Class="Tron.Views.StartupPage"
+             Title="Tron - Lobby">
+
+    <ContentPage.BindingContext>
+        <vm:StartupViewModel />
+    </ContentPage.BindingContext>
+
+    <ContentPage.Resources>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto, Auto, *" Padding="20" RowSpacing="15">
+
+        <Label Text="TRON REALITY" 
+               FontSize="32" 
+               FontAttributes="Bold" 
+               HorizontalOptions="Center" 
+               TextColor="{StaticResource Primary}" />
+
+        <VerticalStackLayout Grid.Row="1" Spacing="10">
+            <Label Text="{Binding StatusMessage}" 
+                   HorizontalOptions="Center" 
+                   TextColor="Gray"/>
+
+            <Grid ColumnDefinitions="*, *" ColumnSpacing="10">
+                <Button Grid.Column="0"
+                        Text="Szukaj serwera" 
+                        Command="{Binding SearchServerCommand}" 
+                        BackgroundColor="{StaticResource Primary}"/>
+
+                <Button Grid.Column="1"
+                        Text="Odśwież" 
+                        Command="{Binding RefreshGamesCommand}"
+                        IsEnabled="{Binding CanRefresh}"
+                        BackgroundColor="#2196F3"/>
+            </Grid>
+
+            <ActivityIndicator IsRunning="{Binding IsSearching}" 
+                               IsVisible="{Binding IsSearching}"
+                               Color="{StaticResource Primary}"/>
+        </VerticalStackLayout>
+
+        <CollectionView Grid.Row="2" 
+                        ItemsSource="{Binding Games}"
+                        IsVisible="{Binding IsGameListVisible}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame Margin="0,5" Padding="10" BorderColor="Gray" BackgroundColor="{AppThemeBinding Light=White, Dark=#1E1E1E}">
+                        <Grid ColumnDefinitions="*, Auto">
+                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                <Label Text="{Binding Name}" 
+                                       FontSize="18" 
+                                       FontAttributes="Bold"/>
+
+                                <Label Text="{Binding PlayersDisplay}" 
+                                       FontSize="12" 
+                                       TextColor="#0066CC"
+                                       LineBreakMode="TailTruncation"/>
+
+                                <Label Text="{Binding CountDisplay, StringFormat='Miejsca: {0}'}" 
+                                       FontSize="12" 
+                                       TextColor="Gray"/>
+                            </VerticalStackLayout>
+
+                            <Button Grid.Column="1" 
+                                    Text="Dołącz" 
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:StartupViewModel}}, Path=JoinGameCommand}"
+                                    CommandParameter="{Binding .}"
+                                    VerticalOptions="Center"
+                                    HeightRequest="40"/>
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </Grid>
+</ContentPage>
