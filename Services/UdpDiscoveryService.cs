@@ -4,6 +4,8 @@ using System.Text;
 
 namespace Tron.Server.Services
 {
+
+    // klasa implementująca serwis UDP do nasałuchiwania Discovery i odpowiadania
     public class UdpDiscoveryService : BackgroundService
     {
         private readonly ILogger<UdpDiscoveryService> _logger;

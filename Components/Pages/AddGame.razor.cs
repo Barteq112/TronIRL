@@ -3,14 +3,12 @@ using Microsoft.JSInterop;
 using System.ComponentModel.DataAnnotations;
 using Tron.Server.Services;
 
-namespace Tron.Server.Components.Pages // Upewnij się, że namespace pasuje do folderu!
+namespace Tron.Server.Components.Pages 
 {
-    // Słowo kluczowe "partial" jest tutaj kluczowe - łączy ten plik z plikiem .razor
+    // klasa partial dla komponentu AddGame.razor
     public partial class AddGame : IAsyncDisposable
     {
-        // Wstrzykiwanie zależności w pliku .cs robimy przez [Inject]
-        // ALBO zostawiamy @inject w pliku .razor (wtedy tu nie musimy ich deklarować, bo są w drugiej połówce klasy)
-        // Dla czystości C# często deklaruje się je tutaj:
+
         [Inject] public GameManager GameManager { get; set; } = default!;
         [Inject] public IJSRuntime JS { get; set; } = default!;
 
@@ -18,10 +16,11 @@ namespace Tron.Server.Components.Pages // Upewnij się, że namespace pasuje do 
         private DotNetObjectReference<AddGame>? dotNetHelper;
         private NewGameFormModel newGameModel = new();
 
-        // Zmienne do przechowywania rzeczywistych granic
+     
         private double _minLat, _maxLat, _minLon, _maxLon;
         private bool _isInternalUpdate = false;
 
+        // Metoda wywoływana po pierwszym renderze komponentu
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
             if (firstRender)
@@ -32,6 +31,7 @@ namespace Tron.Server.Components.Pages // Upewnij się, że namespace pasuje do 
             }
         }
 
+        // metoda odzczywająca zmiany z mapy (JS -> C#)
         [JSInvokable]
         public void UpdateCoordinates(double minLat, double maxLat, double minLon, double maxLon)
         {
@@ -49,6 +49,7 @@ namespace Tron.Server.Components.Pages // Upewnij się, że namespace pasuje do 
             StateHasChanged();
         }
 
+        // metoda wywoływana przy zmianie wartości w formularzu (C# -> JS)
         private async Task SyncMapFromInputs()
         {
             if (_isInternalUpdate) return;
@@ -62,6 +63,7 @@ namespace Tron.Server.Components.Pages // Upewnij się, że namespace pasuje do 
             );
         }
 
+        // metoda obsługująca dodanie nowej gry
         private void HandleAddGame()
         {
             double latOffset = (newGameModel.HeightMeters / 2.0) / 111132.0;
@@ -89,6 +91,7 @@ namespace Tron.Server.Components.Pages // Upewnij się, że namespace pasuje do 
         }
 
 
+        // metoda obliczająca odległość między dwoma punktami geograficznymi
         private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
         {
             var R = 6371e3;
@@ -105,13 +108,14 @@ namespace Tron.Server.Components.Pages // Upewnij się, że namespace pasuje do 
             return R * c;
         }
 
+        // metoda do czyszczenia zasobów JS
         public async ValueTask DisposeAsync()
         {
             dotNetHelper?.Dispose();
             if (module is not null) await module.DisposeAsync();
         }
 
-        // Klasa modelu formularza wewnątrz partial class
+        // struktura modelu formularza dodawania gry
         public class NewGameFormModel
         {
             [Required] public string Name { get; set; } = "Moja Arena";

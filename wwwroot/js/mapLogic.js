@@ -1,16 +1,17 @@
 ﻿// wwwroot/js/mapLogic.js
 
+// zmienne globalne
 let map;
 let rectangle;
 let dotNetHelper;
 let isProgrammaticUpdate = false;
 
-// Zmienne dla podglądu (ManageGames)
+
 let viewMap;
 let viewRectangle;
-const mapObjects = {}; // Przechowuje markery i linie graczy
+const mapObjects = {}; 
 
-// --- 1. KREATOR (AddGame) ---
+// funkcje eksportowane do Blazor - dodaje mapę i prostokąt do edycji
 export function initMap(dotNetRef, startLat, startLon) {
     dotNetHelper = dotNetRef;
     const center = { lat: startLat, lng: startLon };
@@ -50,6 +51,7 @@ export function initMap(dotNetRef, startLat, startLon) {
     updateBlazor();
 }
 
+// funkcja do aktualizacji współrzędnych w Blazor
 function updateBlazor() {
     const bounds = rectangle.getBounds();
     const ne = bounds.getNorthEast();
@@ -57,6 +59,7 @@ function updateBlazor() {
     dotNetHelper.invokeMethodAsync("UpdateCoordinates", sw.lat(), ne.lat(), sw.lng(), ne.lng());
 }
 
+// funkcja do aktualizacji prostokąta z Blazor
 export function updateRectangle(lat, lon, widthMeters, heightMeters) {
     if (!map || !rectangle) return;
     isProgrammaticUpdate = true;
@@ -80,7 +83,7 @@ export function updateRectangle(lat, lon, widthMeters, heightMeters) {
     setTimeout(() => { isProgrammaticUpdate = false; }, 100);
 }
 
-// --- 2. PODGLĄD (ManageGames) ---
+// funkcja do wyświetlania gry na mapie
 export function viewGameOnMap(minLat, maxLat, minLon, maxLon) {
     const mapDiv = document.getElementById("viewMap");
     if (!mapDiv) return;
@@ -91,7 +94,7 @@ export function viewGameOnMap(minLat, maxLat, minLon, maxLon) {
         viewMap = new google.maps.Map(mapDiv, {
             zoom: 16,
             center: center,
-            mapTypeId: "roadmap", // Możesz zmienić na 'satellite' dla lepszego efektu
+            mapTypeId: "roadmap", 
             streetViewControl: false,
             mapTypeControl: false,
         });
@@ -104,22 +107,22 @@ export function viewGameOnMap(minLat, maxLat, minLon, maxLon) {
 
     if (viewRectangle) viewRectangle.setMap(null);
 
-    // RYSOWANIE ŚCIANY GRANICZNEJ
+   
     viewRectangle = new google.maps.Rectangle({
         bounds: bounds,
         editable: false,
         draggable: false,
-        strokeColor: "#1c0800", // Biała "elektryczna" ściana
+        strokeColor: "#1c0800", 
         strokeOpacity: 1.0,
-        strokeWeight: 4,      // Gruba linia
+        strokeWeight: 4,      
         fillColor: "#000000",
-        fillOpacity: 0.1,     // Lekko przyciemniony środek
+        fillOpacity: 0.1,     
         map: viewMap,
         clickable: false
     });
 }
 
-// --- 3. LIVE UPDATE (WIZUALIZACJA TRON) ---
+// funkcja do aktualizacji widoku gry - gracze i ich trasy
 export function updateGameView(gameData) {
     if (!viewMap) return;
 
@@ -140,25 +143,26 @@ export function updateGameView(gameData) {
     cleanupLeftPlayers(players);
 }
 
+// funkcja do aktualizacji pojedynczego gracza
 function updateSinglePlayer(player) {
     const name = player.name;
 
-    // Sprawdzamy, czy gracz jest "martwy" (czarny kolor z serwera)
+
     const isDead = player.color === "#000000";
 
     if (!mapObjects[name]) {
-        // --- TWORZENIE NOWEGO GRACZA ---
+
         const marker = new google.maps.Marker({
             position: { lat: player.latitude, lng: player.longitude },
             map: viewMap,
             title: name,
-            zIndex: 100, // Marker zawsze nad linią
+            zIndex: 100, 
             label: {
-                text: name, // PEŁNA NAZWA
+                text: name, 
                 color: "white",
                 fontWeight: "bold",
                 fontSize: "12px",
-                className: "player-label" // Opcjonalnie do CSS
+                className: "player-label" 
             },
             icon: {
                 path: google.maps.SymbolPath.CIRCLE,
@@ -177,19 +181,19 @@ function updateSinglePlayer(player) {
             strokeOpacity: 0.8,
             strokeWeight: 4,
             map: viewMap,
-            zIndex: 1 // Linia pod markerem
+            zIndex: 1 
         });
 
         mapObjects[name] = { marker: marker, polyline: polyline };
     }
 
-    // --- AKTUALIZACJA ---
+
     const obj = mapObjects[name];
 
-    // 1. Aktualizacja pozycji markera
+
     obj.marker.setPosition({ lat: player.latitude, lng: player.longitude });
 
-    // 2. Aktualizacja wyglądu (jeśli np. gracz umarł i zmienił kolor na czarny)
+  
     const icon = obj.marker.getIcon();
     if (icon.fillColor !== player.color) {
         icon.fillColor = player.color;
@@ -198,22 +202,23 @@ function updateSinglePlayer(player) {
         obj.polyline.setOptions({ strokeColor: player.color });
     }
 
-    // 3. Aktualizacja ścieżki (linii)
+
     if (player.trail && player.trail.length > 0) {
-        // Mapujemy współrzędne z C# na Google Maps
-        // Używamy 'lat' i 'lon' (małe litery), bo tak domyślnie serializuje JSON
+
         obj.polyline.setPath(player.trail.map(t => ({ lat: t.lat, lng: t.lon })));
     } else {
         obj.polyline.setPath([]);
     }
 }
 
+
+// funkcja do czyszczenia tras wszystkich graczy
 function clearTrails() {
     for (const key in mapObjects) {
         mapObjects[key].polyline.setPath([]);
     }
 }
-
+// funkcja do usuwania graczy, którzy opuścili grę
 function cleanupLeftPlayers(currentPlayers) {
     for (const key in mapObjects) {
         if (!currentPlayers.hasOwnProperty(key)) {
