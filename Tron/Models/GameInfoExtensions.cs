@@ -1,6 +1,6 @@
 namespace Tron.Protos
 {
-    // Rozszerzamy klasê wygenerowan¹ automatycznie
+    //Przerobienie klasy ¿eby dodaæ w³aœciwoœci wyœwietlania
     public partial class GameInfo
     {
         public string PlayersDisplay

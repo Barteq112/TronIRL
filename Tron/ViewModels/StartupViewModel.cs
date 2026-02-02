@@ -13,6 +13,8 @@ namespace Tron.ViewModels
 {
     public partial class StartupViewModel : ObservableObject
     {
+        // atrybuty, które będą powiązane z widokiem (StartupPage)
+
         [ObservableProperty]
         private string _currentServerIp = "10.0.2.2";
 
@@ -26,10 +28,12 @@ namespace Tron.ViewModels
         private bool isGameListVisible;
 
         [ObservableProperty]
-        private bool canRefresh; // Czy pokazać przycisk odśwież
+        private bool canRefresh; 
 
         public ObservableCollection<GameInfo> Games { get; } = new();
 
+
+        // metoda do wyszukiwania serwera w sieci lokalnej
         [RelayCommand]
         async Task SearchServer()
         {
@@ -39,7 +43,6 @@ namespace Tron.ViewModels
             Games.Clear();
             StatusMessage = "Szukam serwera...";
 
-            // Szukamy adresu (UDP lub Emulator)
             string serverIp = await FindServerIpAsync();
 
             if (string.IsNullOrEmpty(serverIp))
@@ -49,7 +52,6 @@ namespace Tron.ViewModels
                 return;
             }
 
-            // Znaleziono! Zapisujemy IP i pobieramy listę
             _currentServerIp = serverIp;
             CanRefresh = true;
 
@@ -58,6 +60,8 @@ namespace Tron.ViewModels
             IsSearching = false;
         }
 
+
+        // metoda do odświeżania listy gier na znalezionym serwerze
         [RelayCommand]
         async Task RefreshGames()
         {
@@ -72,6 +76,7 @@ namespace Tron.ViewModels
             StatusMessage = "Lista odświeżona.";
         }
 
+        // metoda do pobierania listy gier z serwera
         private async Task FetchGamesList()
         {
             try
@@ -97,6 +102,8 @@ namespace Tron.ViewModels
             }
         }
 
+        // metoda do dołączania do wybranej gry
+
         [RelayCommand]
         async Task JoinGame(GameInfo game)
         {
@@ -112,7 +119,6 @@ namespace Tron.ViewModels
 
             try
             {
-                // 1. Pobierz aktualną lokalizację gracza
                 var location = await Geolocation.Default.GetLocationAsync(new GeolocationRequest(GeolocationAccuracy.High, TimeSpan.FromSeconds(10)));
 
                 if (location == null)
@@ -122,11 +128,10 @@ namespace Tron.ViewModels
                     return;
                 }
 
-                // 2. Przygotuj klienta
                 var channel = GrpcChannel.ForAddress($"http://{_currentServerIp}:50051");
                 var client = new TronGameService.TronGameServiceClient(channel);
 
-                // 3. Wyślij request ze współrzędnymi
+
                 var request = new JoinRequest
                 {
                     GameId = game.Id,
@@ -140,13 +145,11 @@ namespace Tron.ViewModels
 
                 if (response.Success)
                 {
-                    // Przekazujemy dane do gry
                     var navParams = new Dictionary<string, object>
             {
                 { "GameId", game.Id },
                 { "PlayerId", response.PlayerId },
                 { "PlayerName", playerName },
-                // Przekazujemy też granice gry, żeby GamePage wiedział jak narysować mapę
                 { "MinLat", game.MinLatitude },
                 { "MaxLat", game.MaxLatitude },
                 { "MinLon", game.MinLongitude },
@@ -157,7 +160,6 @@ namespace Tron.ViewModels
                 }
                 else
                 {
-                    // Komunikat z serwera np. "Jesteś poza obszarem gry!"
                     await Shell.Current.DisplayAlert("Odmowa dostępu", response.Message, "OK");
                 }
             }
@@ -172,6 +174,7 @@ namespace Tron.ViewModels
             }
         }
 
+        // metoda do wykrywania adresu IP serwera w sieci lokalnej za pomocą UDP broadcast, wysyłając wiadomość "TRON_DISCOVERY" i oczekując na odpowiedź "TRON_HERE"
         private async Task<string?> FindServerIpAsync()
         {
             try
@@ -190,7 +193,6 @@ namespace Tron.ViewModels
 
                 await udpClient.SendAsync(requestData, requestData.Length, endPoint);
 
-                // POPRAWKA: Jawnie oznaczamy typy jako nullable (byte[]? i IPEndPoint?)
                 var result = await Task.Run(() =>
                 {
                     try
@@ -201,7 +203,6 @@ namespace Tron.ViewModels
                     }
                     catch
                     {
-                        // Zwracamy null tuple w razie błędu
                         return (Data: (byte[]?)null, Endpoint: (IPEndPoint?)null);
                     }
                 });
@@ -215,7 +216,7 @@ namespace Tron.ViewModels
                     }
                 }
             }
-            catch { /* Ignoruj błędy UDP */ }
+            catch {}
 
             
 
