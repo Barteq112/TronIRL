@@ -6,7 +6,7 @@
 				 android:supportsRtl="true"
 				 android:usesCleartextTraffic="true">
 
-		<meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyD0K6_sHmPDv4nPaMHVPOHtdoAX7ZR6v4A" />
+		<meta-data android:name="com.google.android.geo.API_KEY" android:value=GOOGLE_MAPS_API_KEY />
 	</application>
 
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
