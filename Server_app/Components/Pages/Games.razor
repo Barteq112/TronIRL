@@ -1,0 +1,214 @@
+﻿@page "/games"
+@rendermode InteractiveServer
+
+<PageTitle>Zarządzaj Grami - TRON</PageTitle>
+
+<div class="container-fluid py-4" style="height: 100vh; overflow: hidden;">
+    <div class="row h-100">
+
+        <div class="col-md-3 h-100 d-flex flex-column border-end bg-light p-0">
+            <div class="p-3 bg-white border-bottom shadow-sm">
+                <h5 class="mb-0 text-primary fw-bold">Lista Gier</h5>
+                <small class="text-muted">Kliknij, aby zarządzać</small>
+            </div>
+
+            <div class="list-group list-group-flush overflow-auto" style="flex: 1;">
+                @if (!GameManager.Games.Any())
+                {
+                    <div class="p-4 text-center text-muted">
+                        <i class="bi bi-inbox fs-1"></i><br />
+                        Brak aktywnych gier.<br />
+                        <a href="add-game" class="btn btn-link btn-sm">Utwórz nową</a>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var gameEntry in GameManager.Games)
+                    {
+                        var g = gameEntry.Value;
+                        var isActive = selectedGame?.Info.Id == g.Info.Id;
+
+                        <button class="list-group-item list-group-item-action border-0 py-3 @(isActive ? "active-game-item" : "")"
+                                @onclick="() => SelectGame(g.Info.Id)">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1 fw-bold">
+                                    @g.Info.Name
+                                    @if (g.IsRunning)
+                                    {
+                                        <span class="text-success ms-1" title="Gra uruchomiona">●</span>
+                                    }
+                                </h6>
+                                <span class="badge @(isActive ? "bg-white text-primary" : "bg-primary") rounded-pill">
+                                    @g.Info.CurrentPlayers / @g.Info.MaxPlayers
+                                </span>
+                            </div>
+                            <small class="@(isActive ? "text-light" : "text-muted")">
+                                ID: @(g.Info.Id.Length > 8 ? g.Info.Id.Substring(0, 8) + "..." : g.Info.Id)
+                            </small>
+                        </button>
+                    }
+                }
+            </div>
+        </div>
+
+        <div class="col-md-9 h-100 overflow-auto bg-white p-0">
+            @if (selectedGame == null)
+            {
+                <div class="d-flex flex-column justify-content-center align-items-center h-100 text-muted">
+                    <i class="bi bi-arrow-left-circle fs-1 mb-3"></i>
+                    <h4>Wybierz grę z listy po lewej</h4>
+                    <p>Aby zobaczyć mapę i zarządzać graczami.</p>
+                </div>
+            }
+            else
+            {
+                <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light sticky-top" style="z-index: 10;">
+                    <div>
+                        <div class="d-flex align-items-center gap-2">
+                            <h4 class="mb-0">@selectedGame.Info.Name</h4>
+
+                            @if (selectedGame.IsRunning)
+                            {
+                                <span class="badge bg-success status-pulse">
+                                    <i class="bi bi-activity"></i> GRA TRWA
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-stop-circle"></i> ZATRZYMANA
+                                </span>
+                            }
+                        </div>
+                        <span class="badge bg-secondary mt-1">ID: @selectedGame.Info.Id</span>
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn btn-success" @onclick="StartGame" disabled="@selectedGame.IsRunning">
+                            <i class="bi bi-play-fill"></i> Start
+                        </button>
+
+                        <button class="btn btn-warning" @onclick="StopGame" disabled="@(!selectedGame.IsRunning)">
+                            <i class="bi bi-pause-fill"></i> Stop
+                        </button>
+
+                        <button class="btn btn-danger" @onclick="DeleteGame">
+                            <i class="bi bi-trash-fill"></i> Usuń Grę
+                        </button>
+                    </div>
+                </div>
+
+                <div class="container-fluid p-3">
+                    <div class="row g-3">
+
+                        <div class="col-lg-8">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-header bg-white fw-bold d-flex justify-content-between">
+                                    <span><i class="bi bi-map me-2"></i> Obszar Gry (Podgląd)</span>
+                                    @if (selectedGame.IsRunning)
+                                    {
+                                        <small class="text-success animate-blink">● LIVE</small>
+                                    }
+                                </div>
+                                <div class="card-body p-0">
+                                    <div id="viewMap" style="height: 400px; width: 100%;"></div>
+                                </div>
+                                <div class="card-footer bg-light small text-muted">
+                                    Wymiary: @selectedGame.WidthMeters.ToString("F0") m x @selectedGame.HeightMeters.ToString("F0") m
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4">
+                            <div class="card shadow-sm h-100">
+                                <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+                                    <span><i class="bi bi-people me-2"></i> Gracze</span>
+
+                                    <div>
+                                        <button class="btn btn-sm btn-outline-primary me-2" @onclick="AddBot" title="Dodaj Bota AI">
+                                            <i class="bi bi-robot"></i> +Bot
+                                        </button>
+                                        <span class="badge bg-info text-dark">@selectedGame.Info.CurrentPlayers</span>
+                                    </div>
+                                </div>
+
+                                <div class="card-body p-0 overflow-auto" style="max-height: 400px;">
+                                    @if (selectedGame.Info.PlayerNames.Count == 0)
+                                    {
+                                        <div class="text-center p-4 text-muted">
+                                            Brak graczy w lobby.
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <ul class="list-group list-group-flush">
+                                            @foreach (var player in selectedGame.Info.PlayerNames.ToList())
+                                            {
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <span class="fw-bold text-dark">
+                                                        @player
+                                                        @if (player.StartsWith("Bot_"))
+                                                        {
+                                                            <i class="bi bi-robot ms-1 text-muted" style="font-size: 0.8em;"></i>
+                                                        }
+                                                    </span>
+                                                    <button class="btn btn-sm btn-outline-danger"
+                                                            @onclick="() => RemovePlayer(player)"
+                                                            title="Wyrzuć gracza">
+                                                        <i class="bi bi-x-lg"></i>
+                                                    </button>
+                                                </li>
+                                            }
+                                        </ul>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .active-game-item {
+        background-color: #0d6efd !important;
+        color: white !important;
+        border-left: 5px solid #0a58ca !important;
+    }
+
+    .status-pulse {
+        animation: pulse-green 2s infinite;
+        box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.7);
+    }
+
+    /* Poprawione keyframes z podwójną małpą */
+    @@keyframes pulse-green {
+        0% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.7);
+        }
+
+        70% {
+            transform: scale(1.0);
+            box-shadow: 0 0 0 10px rgba(25, 135, 84, 0);
+        }
+
+        100% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(25, 135, 84, 0);
+        }
+    }
+
+    .animate-blink {
+        animation: blinker 1s linear infinite;
+    }
+
+    @@keyframes blinker {
+        50% {
+            opacity: 0;
+        }
+    }
+</style>
