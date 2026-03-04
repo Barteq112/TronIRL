@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="../Tron.Server/Tron.Server.csproj" />
+  <Project Path="Tron/Tron.csproj">
+    <Deploy Solution="Debug|*" />
+  </Project>
+</Solution>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:maps="http://schemas.microsoft.com/dotnet/2021/maui/maps"
+             x:Class="Tron.Views.GamePage"
+             Title="GRA TRON"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="Black">
+
+    <Grid IsClippedToBounds="True">
+
+        <maps:Map x:Name="GameMap"
+                  MapType="Street"
+                  IsShowingUser="False"
+                  IsScrollEnabled="False" 
+                  IsZoomEnabled="True"
+                  Scale="3.0"   
+                  AnchorX="0.5"
+                  AnchorY="0.5"
+                  Rotation="{Binding MapRotation}"
+                  HorizontalOptions="Fill"
+                  VerticalOptions="Fill" />
+
+        <Image Source="{FontImageSource Glyph='▲', Color=Red, Size=40}"
+               VerticalOptions="Center"
+               HorizontalOptions="Center"
+               InputTransparent="True"
+               ZIndex="100"/>
+
+        <Grid VerticalOptions="End" HorizontalOptions="Center" Margin="0,0,0,30" InputTransparent="False" ZIndex="101">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Label Text="{Binding StatusMessage}" 
+                   TextColor="Lime" 
+                   FontSize="12" 
+                   HorizontalOptions="Center" 
+                   BackgroundColor="#88000000"
+                   Padding="10,2"
+                   Margin="0,0,0,10"/>
+
+            <Border Grid.Row="1" 
+                    BackgroundColor="#AA000000" 
+                    Stroke="Cyan" 
+                    StrokeShape="RoundRectangle 15"
+                    Padding="15,5">
+                <VerticalStackLayout Spacing="0">
+                    <Label Text="PRĘDKOŚĆ" TextColor="Gray" FontSize="10" HorizontalOptions="Center"/>
+                    <HorizontalStackLayout Spacing="5" HorizontalOptions="Center">
+                        <Label Text="{Binding CurrentSpeed, StringFormat='{0:F0}'}" 
+                               TextColor="Cyan" FontSize="30" FontAttributes="Bold"/>
+                        <Label Text="km/h" TextColor="Cyan" FontSize="14" VerticalOptions="End" Margin="0,0,0,5"/>
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+        </Grid>
+
+        <Button Text="X" Command="{Binding LeaveGameCommand}"
+                TextColor="White" BackgroundColor="#CC0000"
+                HorizontalOptions="End" VerticalOptions="Start"
+                Margin="20" WidthRequest="50" HeightRequest="50" CornerRadius="25"
+                ZIndex="102"/>
+    </Grid>
+</ContentPage>
